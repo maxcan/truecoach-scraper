@@ -1,0 +1,28 @@
+{
+  "name": "truecoach-scraper",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "repository": "https://github.com/maxcan/truecoach-scraper.git",
+  "author": "Max Cantor <tbmb13> <max@cantor.mx>",
+  "scripts": {
+    "start": "tsc && node dist/index.js"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/bluebird": "^3.5.27",
+    "@types/dotenv": "^6.1.1",
+    "@types/puppeteer": "^1.12.4",
+    "concurrently": "^4.1.0",
+    "nodemon": "^1.19.0",
+    "prettier": "^1.17.1",
+    "puppeteer": "^1.16.0",
+    "ts-node": "^8.1.0",
+    "tslint": "^5.16.0",
+    "typescript": "^3.4.5"
+  },
+  "dependencies": {
+    "axios": "^0.18.0",
+    "bluebird": "^3.5.5",
+    "dotenv": "^8.0.0"
+  }
+}
