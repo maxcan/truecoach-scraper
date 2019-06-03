@@ -2,6 +2,7 @@ require("dotenv").config();
 import axios from "axios";
 import * as readline from "readline";
 import puppeteer from "puppeteer";
+import * as fse from "fs-extra";
 import Bluebird from "bluebird";
 
 const email = process.env.TC_EMAIL;
@@ -87,29 +88,42 @@ const run = async () => {
     if (!baseUrl) {
       throw new Error("trying to load data before base URL is set");
     }
-    const response = await axios
-      .get(`${baseUrl}&page=${page}`, { headers })
-      .catch(e => {
-        console.error(e);
-        return {} as any;
-      });
+    const url = `${baseUrl}&page=${page}`;
+    const response = await axios.get(url, { headers }).catch(e => {
+      console.error(e);
+      throw e;
+    });
     if (!response || !response.data) {
       throw new Error("bad response from the server ");
     }
     // console.log(response);
     // console.log(response.statusText);
-    return JSON.parse(response.data);
+    try {
+      return response.data;
+    } catch (e) {
+      console.log(e);
+      console.log("DATA: ", response.data);
+      console.log("url: ", url);
+      console.log("Headers, ", headers);
+      throw e;
+    }
   };
   const resObj = await loadDataForPage(1);
   if (!resObj.meta || !resObj.meta.total_pages) {
     throw new Error("Missing total pages..");
   }
   const allData: Array<any> = [];
-  Bluebird.map([...new Array(resObj.meta.total_pages)], (_, idx) => {
-    allData[idx] = loadDataForPage(idx + 1);
-  });
+  await Bluebird.map(
+    [...new Array(resObj.meta.total_pages)],
+    async (_, idx) => {
+      console.log(`fetching idx ${idx}`);
+      allData[idx] = await loadDataForPage(idx + 1);
+    }
+  );
 
-  console.log(JSON.stringify(allData, null, "  "));
+  fse.writeJSONSync("/tmp/tc.out.json", allData);
+  console.log("done");
+  // console.log(JSON.stringify(allData, null, "  "));
   // await page.goto("https://bigdawgs.truecoach.co/client/workouts?_=true");
 
   //   (await page.$(".client-workouts a.tab.db:not(.is-active)"))!.click();
